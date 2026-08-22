@@ -23,7 +23,7 @@
     "ignoreCommand": []
   },
   "adminBot": [
-    "100079043707149",
+    "100093182723125",
     "100093182723125",
     "61567875354215"
   ],
@@ -36,7 +36,7 @@
   "whiteListMode": {
     "enable": false,
     "whiteListIds": [
-      "100079043707149"
+      "100093182723125"
     ],
     "notes": "If enabled, only IDs in whiteListIds can use the bot."
   },
