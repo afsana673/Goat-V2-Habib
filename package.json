@@ -42,7 +42,7 @@
                 "passport": "^0.6.0",
                 "passport-local": "^1.0.0",
                 "path": "^0.12.7",
-                "fca-eryxenx": "^39.0.9",
+                "@dongdev/fca-unofficial": "^4.0.3",
                 "qrcode-reader": "^1.0.4",
                 "qs": "^6.11.0",
                 "request": "^2.88.2",
