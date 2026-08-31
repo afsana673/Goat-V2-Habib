@@ -189,11 +189,11 @@ module.exports = async function (databaseType, userModel, api, fakeGraphql) {
 			return getNameInDB(userID);
 
 		try {
-			const user = await axios.post(`https://www.facebook.com/api/graphql/?q=${`node(${userID}){name}`}`);
-			return user.data[userID].name;
+			const user = await axios.post(`https://www.facebook.com/api/graphql/?q=\( {`node( \){userID}){name}`}`);
+			return user.data?.[userID]?.name || getNameInDB(userID) || "Facebook User";
 		}
 		catch (error) {
-			return getNameInDB(userID);
+			return getNameInDB(userID) || "Facebook User";
 		}
 	}
 
@@ -211,7 +211,7 @@ module.exports = async function (databaseType, userModel, api, fakeGraphql) {
 					variables: JSON.stringify({ height: 500, scale: 1, userID, width: 500 })
 				}
 			});
-			return user.data.data.profile.profile_picture.uri;
+			return user.data?.data?.profile?.profile_picture?.uri || "https://i.ibb.co/bBSpr5v/143086968-2856368904622192-1959732218791162458-n.png";
 		}
 		catch (err) {
 			return "https://i.ibb.co/bBSpr5v/143086968-2856368904622192-1959732218791162458-n.png";
@@ -237,12 +237,23 @@ module.exports = async function (databaseType, userModel, api, fakeGraphql) {
 						message: `The first argument (userID) must be a number, not ${typeof userID}`
 					});
 				}
-				userInfo = userInfo || (await api.getUserInfo(userID))[userID];
+
+				userInfo = userInfo || (await api.getUserInfo(userID))?.[userID];
+
+				// ===== FIX START =====
+				if (!userInfo || typeof userInfo !== "object") {
+					throw new CustomError({
+						name: "USER_INFO_NOT_FOUND",
+						message: `Can't get info of user with id "${userID}" from Facebook`
+					});
+				}
+				// ===== FIX END =====
+
 				let userData = {
 					userID,
-					name: userInfo.name,
-					gender: userInfo.gender,
-					vanity: userInfo.vanity,
+					name: userInfo.name || "Facebook User",
+					gender: userInfo.gender || 0,
+					vanity: userInfo.vanity || "",
 					exp: 0,
 					money: 0,
 					banned: {},
@@ -286,12 +297,21 @@ module.exports = async function (databaseType, userModel, api, fakeGraphql) {
 						});
 					}
 					const infoUser = await get_(userID);
-					updateInfoUser = updateInfoUser || (await api.getUserInfo(userID))[userID];
+					updateInfoUser = updateInfoUser || (await api.getUserInfo(userID))?.[userID];
+
+					// ===== FIX START =====
+					if (!updateInfoUser || typeof updateInfoUser !== "object") {
+						throw new CustomError({
+							name: "USER_INFO_NOT_FOUND",
+							message: `Can't get info of user with id "${userID}" from Facebook`
+						});
+					}
+					// ===== FIX END =====
 
 					const newData = {
-						name: updateInfoUser.name,
-						vanity: updateInfoUser.vanity,
-						gender: updateInfoUser.gender
+						name: updateInfoUser.name || infoUser.name || "Facebook User",
+						vanity: updateInfoUser.vanity || infoUser.vanity || "",
+						gender: updateInfoUser.gender || infoUser.gender || 0
 					};
 					let userData = {
 						...infoUser,
